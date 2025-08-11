@@ -47,7 +47,9 @@ install_tts_engines() {
     if command_exists python3 && command_exists pip3; then
         echo "✅ Python3 and pip3 already available"
         echo "📦 Installing Python TTS dependencies..."
-        pip3 install --user gtts coqui-tts torch torchaudio
+        # Try with --user first, then with --break-system-packages for newer Ubuntu
+        pip3 install --user gtts coqui-tts torch torchaudio 2>/dev/null || \
+        pip3 install --user --break-system-packages gtts coqui-tts torch torchaudio
         echo "✅ Python TTS packages installed"
     else
         echo "⚠️  Python3/pip3 not found - Coqui TTS models may not work"
