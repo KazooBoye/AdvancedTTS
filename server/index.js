@@ -25,7 +25,15 @@ app.use(limiter);
 
 // CORS configuration
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:3000',
+  origin: [
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    'http://172.19.80.24:3000',  // WSL network IP
+    'http://192.168.1.64:3000',  // Your Windows network IP
+    /^http:\/\/172\.19\.\d+\.\d+:3000$/,  // WSL subnet
+    /^http:\/\/192\.168\.1\.\d+:3000$/,   // Local network subnet
+    process.env.CLIENT_URL
+  ].filter(Boolean),
   credentials: true
 }));
 
@@ -43,8 +51,8 @@ const createDirectories = async () => {
 
 // Static files - serve generated audio files with proper headers
 app.use('/audio', (req, res, next) => {
-  // Set CORS headers for audio files
-  res.header('Access-Control-Allow-Origin', process.env.CLIENT_URL || 'http://localhost:3000');
+  // Set CORS headers for audio files - allow all origins in development
+  res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, Cache-Control');
   res.header('Access-Control-Allow-Credentials', 'true');
