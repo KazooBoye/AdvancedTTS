@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  advanced-tts:
+    build: .
+    ports:
+      - "3000:5001"
+    environment:
+      - NODE_ENV=production
+      - PORT=5001
+    volumes:
+      - tts_output:/app/server/output
+      - tts_cache:/app/server/cache
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5001/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  tts_output:
+  tts_cache:

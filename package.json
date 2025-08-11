@@ -1,0 +1,50 @@
+{
+  "name": "advanced-tts",
+  "version": "1.0.0",
+  "description": "Advanced Text-to-Speech Web Application with Multiple Engines",
+  "main": "server/index.js",
+  "scripts": {
+    "dev": "concurrently \"npm run server:dev\" \"npm run client:dev\"",
+    "server:dev": "cd server && npm run dev",
+    "client:dev": "cd client && npm start",
+    "build": "cd client && npm run build",
+    "start": "cd server && npm start",
+    "install:all": "npm install && cd server && npm install && cd ../client && npm install",
+    "setup": "npm run install:all",
+    "test": "cd server && npm test && cd ../client && npm test",
+    "lint": "cd server && npm run lint && cd ../client && npm run lint",
+    "clean": "rm -rf server/output/* server/temp/* server/cache/* client/build",
+    "docker:build": "docker build -t advanced-tts .",
+    "docker:run": "docker run -p 3000:5000 advanced-tts",
+    "docker:compose": "docker-compose up -d"
+  },
+  "keywords": [
+    "text-to-speech",
+    "tts",
+    "audio",
+    "multilingual",
+    "vietnamese",
+    "web-app",
+    "nodejs",
+    "react",
+    "express",
+    "mui"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/AdvancedTTS.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/AdvancedTTS/issues"
+  },
+  "homepage": "https://github.com/yourusername/AdvancedTTS#readme",
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
