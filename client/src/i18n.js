@@ -45,7 +45,8 @@ const resources = {
       info: {
         previewNote: "Preview plays first 200 characters",
         unlimitedLength: "Unlimited text length supported",
-        downloadReady: "Audio file ready for download"
+        downloadReady: "Audio file ready for download",
+        fallbackUsed: "Using {{actualEngine}} fallback due to {{reason}} with {{originalEngine}}"
       }
     }
   },
@@ -91,7 +92,8 @@ const resources = {
       info: {
         previewNote: "Xem trước phát 200 ký tự đầu",
         unlimitedLength: "Hỗ trợ văn bản không giới hạn độ dài",
-        downloadReady: "File audio sẵn sàng tải xuống"
+        downloadReady: "File audio sẵn sàng tải xuống",
+        fallbackUsed: "Sử dụng {{actualEngine}} dự phòng do {{reason}} với {{originalEngine}}"
       }
     }
   },
@@ -183,7 +185,8 @@ const resources = {
       info: {
         previewNote: "L'aperçu lit les 200 premiers caractères",
         unlimitedLength: "Supporte un texte de longueur illimitée",
-        downloadReady: "Fichier audio prêt à télécharger"
+        downloadReady: "Fichier audio prêt à télécharger",
+        fallbackUsed: "Utilisation de {{actualEngine}} de repli en raison de {{reason}} avec {{originalEngine}}"
       }
     }
   },

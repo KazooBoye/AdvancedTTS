@@ -203,29 +203,157 @@ const engines = {
       ssml: false,
       speed: true,
       pitch: false,
-      volume: false
+      volume: false,
+      models: true  // New feature: supports model selection
     },
     languages: [
-      { code: 'en', name: 'English', variants: ['en-us', 'en-gb'] },
-      { code: 'vi', name: 'Vietnamese', variants: ['vi'] },
-      { code: 'es', name: 'Spanish', variants: ['es'] },
-      { code: 'fr', name: 'French', variants: ['fr'] },
-      { code: 'de', name: 'German', variants: ['de'] },
-      { code: 'it', name: 'Italian', variants: ['it'] },
-      { code: 'pt', name: 'Portuguese', variants: ['pt', 'pt-br'] },
-      { code: 'ru', name: 'Russian', variants: ['ru'] },
-      { code: 'zh', name: 'Chinese', variants: ['zh'] },
-      { code: 'ja', name: 'Japanese', variants: ['ja'] },
-      { code: 'ko', name: 'Korean', variants: ['ko'] },
-      { code: 'ar', name: 'Arabic', variants: ['ar'] },
-      { code: 'hi', name: 'Hindi', variants: ['hi'] },
-      { code: 'th', name: 'Thai', variants: ['th'] },
-      { code: 'tr', name: 'Turkish', variants: ['tr'] },
-      { code: 'pl', name: 'Polish', variants: ['pl'] },
-      { code: 'nl', name: 'Dutch', variants: ['nl'] },
-      { code: 'fi', name: 'Finnish', variants: ['fi'] },
-      { code: 'hu', name: 'Hungarian', variants: ['hu'] },
-      { code: 'cs', name: 'Czech', variants: ['cs'] }
+      { 
+        code: 'en', 
+        name: 'English', 
+        variants: ['en-us', 'en-gb'],
+        models: [
+          {
+            id: 'ljspeech-vits',
+            name: 'LJSpeech VITS',
+            description: 'High-quality female voice trained on LJSpeech dataset',
+            model_name: 'tts_models/en/ljspeech/vits',
+            language: 'en-us',
+            speaker: 'female',
+            quality: 'high'
+          },
+          {
+            id: 'ljspeech-tacotron2',
+            name: 'LJSpeech Tacotron2',
+            description: 'Neural voice using Tacotron2 architecture',
+            model_name: 'tts_models/en/ljspeech/tacotron2-DDC',
+            language: 'en-us',
+            speaker: 'female',
+            quality: 'medium'
+          },
+          {
+            id: 'vctk-vits',
+            name: 'VCTK Multi-Speaker',
+            description: 'Multi-speaker English model with voice selection',
+            model_name: 'tts_models/en/vctk/vits',
+            language: 'en-gb',
+            speaker: 'multi',
+            quality: 'high',
+            speakers: ['p225', 'p226', 'p227', 'p228', 'p229', 'p230', 'p231', 'p232', 'p233', 'p234']
+          }
+        ]
+      },
+      { 
+        code: 'es', 
+        name: 'Spanish', 
+        variants: ['es'],
+        models: [
+          {
+            id: 'mai-vits',
+            name: 'MAI Spanish',
+            description: 'High-quality Spanish voice',
+            model_name: 'tts_models/es/mai/tacotron2-DDC',
+            language: 'es',
+            speaker: 'female',
+            quality: 'high'
+          }
+        ]
+      },
+      { 
+        code: 'fr', 
+        name: 'French', 
+        variants: ['fr'],
+        models: [
+          {
+            id: 'mai-fr-vits',
+            name: 'MAI French',
+            description: 'High-quality French voice',
+            model_name: 'tts_models/fr/mai/tacotron2-DDC',
+            language: 'fr',
+            speaker: 'female',
+            quality: 'high'
+          }
+        ]
+      },
+      { 
+        code: 'de', 
+        name: 'German', 
+        variants: ['de'],
+        models: [
+          {
+            id: 'thorsten-vits',
+            name: 'Thorsten German',
+            description: 'High-quality German male voice',
+            model_name: 'tts_models/de/thorsten/vits',
+            language: 'de',
+            speaker: 'male',
+            quality: 'high'
+          }
+        ]
+      },
+      { 
+        code: 'it', 
+        name: 'Italian', 
+        variants: ['it'],
+        models: [
+          {
+            id: 'mai-it-vits',
+            name: 'MAI Italian',
+            description: 'High-quality Italian voice',
+            model_name: 'tts_models/it/mai_female/vits',
+            language: 'it',
+            speaker: 'female',
+            quality: 'high'
+          }
+        ]
+      },
+      { 
+        code: 'pt', 
+        name: 'Portuguese', 
+        variants: ['pt', 'pt-br'],
+        models: [
+          {
+            id: 'cv-vits',
+            name: 'Portuguese Common Voice',
+            description: 'Portuguese voice trained on Common Voice dataset',
+            model_name: 'tts_models/pt/cv/vits',
+            language: 'pt',
+            speaker: 'mixed',
+            quality: 'medium'
+          }
+        ]
+      },
+      { 
+        code: 'zh', 
+        name: 'Chinese', 
+        variants: ['zh'],
+        models: [
+          {
+            id: 'baker-vits',
+            name: 'Chinese Baker',
+            description: 'High-quality Chinese voice',
+            model_name: 'tts_models/zh-CN/baker/tacotron2-DDC-GST',
+            language: 'zh',
+            speaker: 'female',
+            quality: 'high'
+          }
+        ]
+      },
+      { 
+        code: 'ja', 
+        name: 'Japanese', 
+        variants: ['ja'],
+        models: [
+          {
+            id: 'kokoro-vits',
+            name: 'Japanese Kokoro',
+            description: 'High-quality Japanese voice',
+            model_name: 'tts_models/ja/kokoro/tacotron2-DDC',
+            language: 'ja',
+            speaker: 'female',
+            quality: 'high'
+          }
+        ]
+      }
     ]
   }
 };

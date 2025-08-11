@@ -32,10 +32,12 @@ npm run dev
 
 1. Open http://localhost:3000
 2. Type "Hello, this is a test" in the text field
-3. Select your preferred language and engine
+3. Select your preferred language and engine (try Coqui for best quality)
 4. Click "Preview" to hear a quick sample
 5. Click "Generate Speech" for full audio
-6. Download the MP3 file
+6. Download the audio file (supports MP3, WAV, OGG, M4A)
+
+**Note**: If Coqui TTS encounters compatibility issues, the system will automatically fallback to gTTS and notify you.
 
 ## 🛠️ Manual Engine Installation
 
@@ -71,13 +73,15 @@ docker-compose up -d
 
 ## 📱 Testing Different Languages
 
-The application supports many languages including:
-- English (en, en-us, en-gb)
-- Vietnamese (vi)
-- Spanish (es)
-- French (fr)
-- German (de)
-- And many more...
+The application supports many languages with intelligent engine selection:
+- **English** (en, en-us, en-gb) - All engines
+- **Vietnamese** (vi) - eSpeak-NG, Festival, Coqui, gTTS
+- **Spanish** (es) - eSpeak-NG, Festival, Coqui, gTTS
+- **French** (fr) - eSpeak-NG, Festival, Coqui, gTTS
+- **German** (de) - eSpeak-NG, Festival, Coqui, gTTS
+- And 50+ more languages...
+
+**Pro Tip**: Coqui TTS provides the highest quality but may fallback to gTTS for compatibility. gTTS requires internet connection but provides excellent neural voices.
 
 ## 🔧 Troubleshooting
 

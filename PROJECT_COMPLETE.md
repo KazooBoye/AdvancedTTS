@@ -32,12 +32,14 @@ AdvancedTTS/
 ## 🎯 Key Features Implemented
 
 ### **🔧 Backend Features**
-- ✅ Multiple TTS engines (eSpeak-NG, eSpeak, Festival, Pico)
-- ✅ Multi-language support (20+ languages including Vietnamese)
+- ✅ Multiple TTS engines (5 total: Coqui, gTTS, eSpeak-NG, eSpeak, pyttsx3)
+- ✅ Intelligent dynamic fallback system (Coqui → gTTS)
+- ✅ Multi-language support (50+ languages including Vietnamese)
 - ✅ Audio format conversion (MP3, WAV, OGG, M4A)
 - ✅ Rate limiting and security
 - ✅ File cleanup and caching
 - ✅ RESTful API with comprehensive error handling
+- ✅ Real-time fallback notifications
 
 ### **🎨 Frontend Features**
 - ✅ Modern Material-UI design
@@ -126,18 +128,22 @@ npm run dev
 
 ## 🛠️ TTS Engines Included
 
-1. **eSpeak-NG** - Modern, best multi-language support
-2. **eSpeak** - Classic, reliable
-3. **Festival** - High-quality synthesis
-4. **Pico TTS** - Compact and efficient
+1. **Coqui TTS** - Neural, highest quality (primary engine)
+2. **Google TTS (gTTS)** - Neural voices, fallback engine
+3. **eSpeak-NG** - Modern, best multi-language support
+4. **eSpeak** - Classic, reliable
+5. **pyttsx3** - System voices, cross-platform
 
 ## 🌟 Special Features
 
+- **🧠 Neural TTS** - Coqui and gTTS for natural-sounding voices
+- **🔄 Dynamic Fallback** - Automatic compatibility detection and engine switching  
 - **🔄 Unlimited Text Length** - No restrictions on input size
 - **🎵 Multiple Audio Formats** - MP3, WAV, OGG, M4A
 - **🌐 Multi-language UI** - Switch between English, Vietnamese, Spanish
 - **⚡ Real-time Preview** - Hear first 200 characters instantly
-- **💾 Auto-download** - One-click MP3 download
+- **💾 Auto-download** - One-click audio download
+- **🔔 User Notifications** - Informed when fallback is triggered
 - **🔒 Security** - Rate limiting, input validation, CORS protection
 - **📱 Responsive** - Works on desktop, tablet, and mobile
 

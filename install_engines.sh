@@ -32,6 +32,41 @@ pip3 install pyttsx3
 echo "Installing Coqui TTS (Deep Learning TTS)..."
 pip3 install coqui-tts
 
+# Install Japanese language support for Coqui TTS
+echo "Installing Japanese language support for Coqui TTS..."
+pip3 install "coqui-tts[ja]" || echo "⚠️ Japanese support installation failed, but basic Coqui TTS is still functional"
+
+echo "✅ Python packages installed"
+
+# Pre-download essential Coqui TTS models
+echo ""
+echo "🎯 Pre-downloading essential Coqui TTS models..."
+echo "This may take several minutes and requires ~2GB of storage..."
+
+python3 -c "
+from TTS.api import TTS
+import sys
+
+# Essential models for quick start
+essential_models = [
+    'tts_models/en/ljspeech/vits',          # High-quality English
+    'tts_models/en/vctk/vits',              # Multi-speaker English
+]
+
+print('Downloading essential Coqui TTS models...')
+for model_name in essential_models:
+    try:
+        print(f'  • Downloading {model_name}...')
+        tts = TTS(model_name=model_name)
+        print(f'    ✅ {model_name} ready')
+    except Exception as e:
+        print(f'    ❌ Failed: {e}')
+        continue
+
+print('Essential models download complete!')
+print('Additional models will be downloaded automatically when first used.')
+" || echo "⚠️ Model pre-download failed, but models will download automatically when needed"
+
 echo "✅ Python packages installed"
 
 # Install Piper TTS
@@ -139,7 +174,11 @@ echo "- gTTS: Newly installed (requires internet)"
 echo "- Piper TTS: Newly installed (local, high quality)"
 echo "- pyttsx3: Newly installed (uses system voices)"
 echo "- Coqui TTS: Newly installed (deep learning, highest quality)"
+echo "  └── Essential models pre-downloaded: English (LJSpeech, VCTK Multi-speaker)"
+echo "  └── Additional models (8 languages) download automatically when selected"
 echo ""
-echo "📖 For more information and troubleshooting, see TTS_ENGINES_SETUP.md"
+echo "📖 For more information and troubleshooting:"
+echo "  - TTS Engines: see TTS_ENGINES_SETUP.md"
+echo "  - Coqui TTS Models: see docs/COQUI_TTS_MODELS.md"
 echo ""
 echo "🚀 You can now restart the TTS application to use the new engines!"

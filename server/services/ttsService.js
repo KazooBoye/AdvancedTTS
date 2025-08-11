@@ -60,7 +60,9 @@ class TTSService {
       speed = 150,
       pitch = 50,
       volume = 100,
-      format = 'mp3'
+      format = 'mp3',
+      model = null,
+      speaker = null
     } = options;
 
     // Validate engine
@@ -77,11 +79,13 @@ class TTSService {
 
     try {
       // Generate speech based on engine
-      await this.generateSpeechFile(engine, text, tempWavPath, {
+      const result = await this.generateSpeechFile(engine, text, tempWavPath, {
         language,
         speed,
         pitch,
-        volume
+        volume,
+        model,
+        speaker
       });
 
       // Convert to requested format if not WAV
@@ -92,7 +96,7 @@ class TTSService {
         await fs.move(tempWavPath, outputPath);
       }
 
-      return {
+      const response = {
         id: outputId,
         filename: outputFileName,
         path: outputPath,
@@ -102,6 +106,18 @@ class TTSService {
         language: language,
         duration: await this.getAudioDuration(outputPath)
       };
+
+      // Add fallback information if applicable
+      if (result && result.fallbackUsed) {
+        response.fallback = {
+          used: true,
+          originalEngine: result.originalEngine,
+          actualEngine: result.fallbackEngine,
+          reason: 'Model compatibility issue'
+        };
+      }
+
+      return response;
     } catch (error) {
       // Clean up any temporary files
       await fs.remove(tempWavPath).catch(() => {});
@@ -115,21 +131,28 @@ class TTSService {
 
     switch (engine) {
       case 'espeak-ng':
-        return this.generateEspeakNG(text, outputPath, { language, speed, pitch, volume });
+        await this.generateEspeakNG(text, outputPath, { language, speed, pitch, volume });
+        return null;
       case 'espeak':
-        return this.generateEspeak(text, outputPath, { language, speed, pitch, volume });
+        await this.generateEspeak(text, outputPath, { language, speed, pitch, volume });
+        return null;
       case 'festival':
-        return this.generateFestival(text, outputPath, { language, speed, volume });
+        await this.generateFestival(text, outputPath, { language, speed, volume });
+        return null;
       case 'pico':
-        return this.generatePico(text, outputPath, { language, volume });
+        await this.generatePico(text, outputPath, { language, volume });
+        return null;
       case 'gtts':
-        return this.generateGTTS(text, outputPath, { language, speed });
+        await this.generateGTTS(text, outputPath, { language, speed });
+        return null;
       case 'piper':
-        return this.generatePiper(text, outputPath, { language, speed });
+        await this.generatePiper(text, outputPath, { language, speed });
+        return null;
       case 'pyttsx3':
-        return this.generatePyttsx3(text, outputPath, { language, speed, volume });
+        await this.generatePyttsx3(text, outputPath, { language, speed, volume });
+        return null;
       case 'coqui':
-        return this.generateCoqui(text, outputPath, { language, speed });
+        return this.generateCoqui(text, outputPath, { language, speed, model: options.model, speaker: options.speaker });
       default:
         throw new Error(`Unsupported engine: ${engine}`);
     }
@@ -410,15 +433,47 @@ except Exception as e:
 
   generateCoqui(text, outputPath, options) {
     return new Promise((resolve, reject) => {
-      const { language, speed = 1.0 } = options;
+      const { language, speed = 1.0, model, speaker } = options;
+      
+      // Get the appropriate model for the language
+      const engineConfig = engines.coqui;
+      let selectedModel = null;
+      
+      // Find the language configuration
+      const langConfig = engineConfig.languages.find(lang => 
+        lang.code === language || lang.variants?.includes(language)
+      );
+      
+      if (langConfig && langConfig.models) {
+        if (model) {
+          // User specified a model
+          selectedModel = langConfig.models.find(m => m.id === model);
+        }
+        if (!selectedModel && langConfig.models.length > 0) {
+          // Use the first available model as default
+          selectedModel = langConfig.models[0];
+        }
+      }
+      
+      // Fallback to default English model if no model found
+      const modelName = selectedModel ? selectedModel.model_name : 'tts_models/en/ljspeech/vits';
       
       // Use pyenv tts command
       const ttsCommand = '/Users/caoducanh/.pyenv/shims/tts';
       const args = [
         '--text', text,
-        '--model_name', `tts_models/en/ljspeech/vits`, // Default to English model
+        '--model_name', modelName,
         '--out_path', outputPath
       ];
+
+      // Add speaker selection if the model supports it
+      if (selectedModel && selectedModel.speakers && speaker) {
+        if (selectedModel.speakers.includes(speaker)) {
+          args.push('--speaker_idx', speaker);
+        }
+      }
+
+      console.log(`🎵 Coqui TTS: Using model ${modelName}${speaker ? ` with speaker ${speaker}` : ''}`);
 
       const process = spawn(ttsCommand, args);
       
@@ -429,9 +484,29 @@ except Exception as e:
 
       process.on('close', (code) => {
         if (code === 0) {
-          resolve();
+          resolve(null);  // Return null for successful Coqui operations
         } else {
-          reject(new Error(`Coqui TTS failed: ${stderr || 'Unknown error'}`));
+          // Dynamic error detection for fallback triggering
+          const errorMessage = stderr || 'Unknown error';
+          const shouldFallback = this.shouldTriggerFallback(errorMessage, modelName);
+          
+          if (shouldFallback) {
+            console.log(`⚠️ Coqui model ${modelName} failed with compatibility issues, falling back to gTTS`);
+            console.log(`🔍 Error detected: ${errorMessage.split('\n')[0]}...`);
+            
+            // Attempt fallback to gTTS
+            return this.generateGTTS(text, outputPath, { language, speed: speed * 150 })
+              .then(() => {
+                resolve({ fallbackUsed: true, fallbackEngine: 'gTTS', originalEngine: 'coqui' });
+              })
+              .catch((fallbackError) => {
+                console.error(`❌ Fallback to gTTS also failed: ${fallbackError.message}`);
+                reject(new Error(`Coqui TTS failed: ${errorMessage}. Fallback to gTTS also failed: ${fallbackError.message}`));
+              });
+          } else {
+            // For non-compatibility errors, don't fallback
+            reject(new Error(`Coqui TTS failed: ${errorMessage}`));
+          }
         }
       });
 
@@ -439,6 +514,50 @@ except Exception as e:
         reject(new Error(`Failed to spawn Coqui TTS: ${error.message}`));
       });
     });
+  }
+
+  // Dynamic error detection method
+  shouldTriggerFallback(errorMessage, modelName) {
+    const compatibilityErrorPatterns = [
+      // PyTorch serialization issues
+      /weights_only.*set to.*False/i,
+      /WeightsUnpickler error/i,
+      /Unsupported class/i,
+      /_pickle\.UnpicklingError/i,
+      
+      // Model loading issues
+      /Error loading model/i,
+      /Failed to load checkpoint/i,
+      /Model checkpoint.*corrupt/i,
+      /Invalid model format/i,
+      
+      // PyTorch version compatibility
+      /torch\.load.*failed/i,
+      /TorchScript.*incompatible/i,
+      /CUDA.*version mismatch/i,
+      
+      // Memory or resource issues that could benefit from fallback
+      /OutOfMemoryError/i,
+      /CUDA out of memory/i,
+      /Resource temporarily unavailable/i,
+      
+      // Model architecture issues
+      /Missing keys in state_dict/i,
+      /Unexpected keys in state_dict/i,
+      /Architecture mismatch/i
+    ];
+    
+    // Check if any compatibility error pattern matches
+    const hasCompatibilityIssue = compatibilityErrorPatterns.some(pattern => 
+      pattern.test(errorMessage)
+    );
+    
+    if (hasCompatibilityIssue) {
+      console.log(`🔍 Detected compatibility issue in model ${modelName}: Auto-fallback triggered`);
+      return true;
+    }
+    
+    return false;
   }
 
   convertAudioFormat(inputPath, outputPath, format) {

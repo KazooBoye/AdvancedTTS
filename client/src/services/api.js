@@ -63,6 +63,15 @@ export const enginesAPI = {
     const response = await api.get(`/engines/${engineName}/check`);
     return response.data;
   },
+
+  // Get available models for an engine
+  getModels: async (engineName, language = null) => {
+    const url = language 
+      ? `/engines/${engineName}/models/${language}`
+      : `/engines/${engineName}/models`;
+    const response = await api.get(url);
+    return response.data;
+  },
 };
 
 export const languagesAPI = {

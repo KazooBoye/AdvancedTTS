@@ -1,167 +1,164 @@
 # TTS Engines Setup Guide
 
-This guide explains how to install and configure various TTS engines for the Advanced TTS application.
+**🎯 Note: This guide provides manual installation instructions. The project's automated setup script (`scripts/setup.sh`) handles most installations automatically.**
 
-## Currently Installed Engines
+This guide explains the TTS engines available in the Advanced TTS application and how to manually configure them if needed.
 
-### 1. eSpeak-NG (✅ Installed)
-- **Status**: Working
-- **Installation**: Already installed via Homebrew
-- **Languages**: 50+ languages including Vietnamese
-- **Voice Quality**: Basic, robotic but clear
+## Current Engine Status
 
-### 2. eSpeak (✅ Installed)
-- **Status**: Working  
-- **Installation**: Already installed via Homebrew
-- **Languages**: 40+ languages
-- **Voice Quality**: Basic, similar to eSpeak-NG
+### ✅ Primary Engines (Auto-configured)
 
-## New Engines to Install
+### 1. **Coqui TTS** (Primary Engine)
+- **Status**: ✅ Integrated with dynamic fallback
+- **Installation**: Automated via setup script (`pip3 install coqui-tts`)
+- **Languages**: 15+ languages with neural models
+- **Voice Quality**: ⭐⭐⭐⭐⭐ Neural, highest quality
+- **Fallback**: Automatically falls back to gTTS on compatibility issues
 
-### 3. Google TTS (gTTS)
-- **Voice Quality**: Natural, high-quality
+### 2. **Google TTS (gTTS)** (Fallback Engine)
+- **Status**: ✅ Integrated as intelligent fallback
+- **Installation**: Automated via setup script (`pip3 install gtts`)
 - **Languages**: 60+ languages with neural voices
-- **Installation**:
-```bash
-# Install Python package
-pip3 install gtts
+- **Voice Quality**: ⭐⭐⭐⭐⭐ Neural, very natural
+- **Network**: Requires internet connection
 
-# Install command-line tool
-pip3 install gtts-cli
-```
-- **Test**:
-```bash
-gtts-cli --text "Hello world" --lang en --output test.mp3
-```
+### 3. **eSpeak-NG** (Multi-language Champion)
+- **Status**: ✅ Working, auto-installed
+- **Installation**: Already configured via Homebrew/apt
+- **Languages**: 50+ languages including Vietnamese
+- **Voice Quality**: ⭐⭐⭐ Basic, robotic but clear
 
-### 4. Piper TTS
-- **Voice Quality**: Neural, very natural
+### 4. **eSpeak** (Classic Reliable)
+- **Status**: ✅ Working, auto-installed  
+- **Installation**: Already configured via Homebrew/apt
+- **Languages**: 40+ languages
+- **Voice Quality**: ⭐⭐⭐ Basic, similar to eSpeak-NG
+
+### 5. **pyttsx3** (System Voices)
+- **Status**: ✅ Working, auto-installed
+- **Installation**: Already configured via pip3
+- **Languages**: Depends on system voices (typically 10+ languages)
+- **Voice Quality**: ⭐⭐⭐ System-dependent
+
+### ⚙️ Additional Engines (Configurable)
+
+The following engines are configured but require additional setup:
+
+### 6. **Festival** (High-Quality Synthesis)
+- **Status**: ⚙️ Configured but not installed
+- **Installation**: `brew install festival` (macOS) or `apt-get install festival` (Linux)
+- **Languages**: Limited but high-quality English
+- **Voice Quality**: ⭐⭐⭐⭐ High-quality synthesis
+
+### 7. **Pico TTS** (Compact & Efficient)
+- **Status**: ⚙️ Configured but not installed (Linux only)
+- **Installation**: `apt-get install pico-utils` (Linux only)
+- **Languages**: Limited selection
+- **Voice Quality**: ⭐⭐⭐ Compact, efficient
+
+### 8. **Piper TTS** (Neural Local)
+- **Status**: ⚙️ Configured but requires voice models
+- **Installation**: Binary auto-installed by setup script, models need download
 - **Languages**: 20+ languages with high-quality voices
-- **Installation**:
-```bash
-# Download Piper binary for macOS
-wget https://github.com/rhasspy/piper/releases/download/v1.2.0/piper_macos_x64.tar.gz
-tar -xzf piper_macos_x64.tar.gz
-sudo mv piper /usr/local/bin/
+- **Voice Quality**: ⭐⭐⭐⭐⭐ Neural, very natural, local processing
 
-# Download voice models (example for English)
+## 🔧 Automatic Setup
+
+**Recommended**: Use the automated setup script which handles all installations:
+
+```bash
+# Run the comprehensive setup
+chmod +x scripts/setup.sh
+./scripts/setup.sh
+```
+
+This script will:
+- ✅ Install all TTS engines for your platform
+- ✅ Configure Python dependencies (Coqui, gTTS, pyttsx3)
+- ✅ Set up FFmpeg for audio conversion
+- ✅ Create required directories
+- ✅ Configure environment variables
+- ✅ Test all engines
+
+**Current Status**: 5 engines working out-of-the-box, 3 additional engines available with manual setup.
+
+## 🛠️ Manual Installation (Advanced Users)
+
+Only needed if the automated setup script fails or you want to customize installations:
+
+### Python TTS Engines
+```bash
+# Install Python TTS packages (if not done by setup script)
+pip3 install gtts coqui-tts torch torchaudio
+```
+
+### Piper Voice Models (Optional)
+```bash
+# Create voice models directory
 mkdir -p ~/.local/share/piper/voices
 cd ~/.local/share/piper/voices
+
+# Download popular English model
 wget https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/lessac/medium/en_US-lessac-medium.onnx
 wget https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/lessac/medium/en_US-lessac-medium.onnx.json
 ```
-- **Test**:
+
+## 🎛️ Engine Selection Strategy
+
+The application uses intelligent engine selection:
+
+1. **Primary**: Tries Coqui TTS for highest quality
+2. **Fallback**: Automatically switches to gTTS if Coqui has compatibility issues
+3. **Traditional**: Uses eSpeak-NG, Festival, Pico for basic needs
+4. **User Choice**: Manual engine selection available in UI
+
+## 🔄 Dynamic Fallback System
+
+The application features an advanced fallback mechanism:
+
+- **Pattern Detection**: Monitors for PyTorch compatibility errors
+- **Automatic Switch**: Seamlessly falls back to gTTS
+- **User Notification**: Informs users when fallback is triggered
+- **Quality Maintenance**: Ensures neural voice quality even in fallback
+
+## 🚨 Troubleshooting
+
+### Engine Not Available
+- **Solution**: Run `./scripts/setup.sh` to reinstall
+- **Check**: Visit `http://localhost:5001/api/engines` to see available engines
+
+### Coqui TTS Failing
+- **Expected**: System will automatically fallback to gTTS
+- **Manual Test**: Try different Coqui models or languages
+
+### No Audio Output
+- **Check**: FFmpeg installation (`which ffmpeg`)
+- **Solution**: Run setup script or install FFmpeg manually
+
+### Permission Errors
 ```bash
-echo "Hello world" | piper --model en_US-lessac-medium.onnx --output_file test.wav
+# Fix audio directory permissions
+chmod 755 server/output server/temp server/cache
 ```
 
-### 5. pyttsx3
-- **Voice Quality**: System voices (varies by OS)
-- **Languages**: Depends on system voices
-- **Installation**:
-```bash
-pip3 install pyttsx3
-```
-- **Test**:
-```python
-import pyttsx3
-engine = pyttsx3.init()
-engine.say("Hello world")
-engine.runAndWait()
-```
+## 🎯 Performance Notes
 
-### 6. Coqui TTS
-- **Voice Quality**: Deep learning, very natural
-- **Languages**: 15+ languages with neural models
-- **Installation**:
-```bash
-pip3 install coqui-tts
-```
-- **Test**:
-```bash
-tts --text "Hello world" --model_name "tts_models/en/ljspeech/tacotron2-DDC" --out_path test.wav
-```
+**Currently Active Engines:**
 
-## Installation Script
+| Engine | Quality | Speed | Network | Best For |
+|--------|---------|-------|---------|----------|
+| **Coqui TTS** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | Offline | Highest quality |
+| **gTTS** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | Online | Fallback, reliability |
+| **eSpeak-NG** | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | Offline | Multi-language |
+| **eSpeak** | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | Offline | Classic reliability |
+| **pyttsx3** | ⭐⭐⭐ | ⭐⭐⭐⭐ | Offline | System voices |
 
-Run this script to install all new TTS engines:
+**Optional Engines (require setup):**
 
-```bash
-#!/bin/bash
+| Engine | Quality | Speed | Network | Installation |
+|--------|---------|-------|---------|--------------|
+| **Piper** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | Offline | Voice models needed |
+| **Festival** | ⭐⭐⭐⭐ | ⭐⭐⭐ | Offline | Manual install required |
+| **Pico** | ⭐⭐⭐ | ⭐⭐⭐⭐ | Offline | Linux only |
 
-echo "Installing TTS engines..."
-
-# Install Python packages
-echo "Installing Python TTS packages..."
-pip3 install gtts gtts-cli pyttsx3 coqui-tts
-
-# Install Piper TTS
-echo "Installing Piper TTS..."
-cd /tmp
-wget https://github.com/rhasspy/piper/releases/download/v1.2.0/piper_macos_x64.tar.gz
-tar -xzf piper_macos_x64.tar.gz
-sudo mv piper /usr/local/bin/
-rm piper_macos_x64.tar.gz
-
-# Create voice models directory
-mkdir -p ~/.local/share/piper/voices
-
-echo "TTS engines installation completed!"
-echo "Note: You may need to download specific voice models for Piper TTS"
-```
-
-## Voice Models for Piper
-
-Piper TTS requires voice models for each language. Download them from:
-https://huggingface.co/rhasspy/piper-voices
-
-### Popular Models:
-- **English**: `en_US-lessac-medium.onnx`
-- **Spanish**: `es_ES-mav-medium.onnx`
-- **French**: `fr_FR-gille-medium.onnx`
-- **German**: `de_DE-thorsten-medium.onnx`
-- **Italian**: `it_IT-riccardo-medium.onnx`
-
-## Troubleshooting
-
-### Common Issues:
-
-1. **Command not found**: Make sure the binary is in your PATH
-2. **Permission denied**: Use `sudo` for system-wide installation
-3. **Missing dependencies**: Install required Python packages
-4. **Voice model not found**: Download the specific model for your language
-
-### Testing Individual Engines:
-
-```bash
-# Test gTTS
-gtts-cli --text "Test" --lang en --output test_gtts.mp3
-
-# Test Piper (requires model)
-echo "Test" | piper --model path/to/model.onnx --output_file test_piper.wav
-
-# Test Coqui
-tts --text "Test" --model_name "tts_models/en/ljspeech/tacotron2-DDC" --out_path test_coqui.wav
-
-# Test pyttsx3 (Python script)
-python3 -c "import pyttsx3; engine = pyttsx3.init(); engine.save_to_file('Test', 'test_pyttsx3.wav'); engine.runAndWait()"
-```
-
-## Configuration
-
-The application will automatically detect available engines. Make sure:
-
-1. All binaries are in your PATH
-2. Required Python packages are installed
-3. Voice models are downloaded (for Piper)
-4. Permissions are set correctly
-
-## Performance Notes
-
-- **gTTS**: Requires internet connection
-- **Piper**: Fast, local processing
-- **pyttsx3**: Uses system voices, fast
-- **Coqui**: Slower but highest quality
-- **eSpeak/eSpeak-NG**: Fastest, basic quality
-
-Choose the appropriate engine based on your quality and speed requirements.
+The application intelligently selects the best available engine and handles fallbacks automatically.

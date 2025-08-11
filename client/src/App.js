@@ -13,7 +13,6 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  CircularProgress,
   Alert,
   LinearProgress,
   Tooltip,
@@ -43,9 +42,12 @@ function App() {
   // State management
   const [text, setText] = useState('');
   const [engines, setEngines] = useState({});
+  const [availableModels, setAvailableModels] = useState([]);
   const [settings, setSettings] = useState({
     engine: 'espeak-ng',
     language: 'en',
+    model: '', // Add model selection
+    speaker: '', // Add speaker selection
     speed: 150,
     pitch: 50,
     volume: 100,
@@ -86,6 +88,14 @@ function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [settings.engine, engines]);
 
+  // Load models when engine or language changes
+  useEffect(() => {
+    if (settings.engine && settings.language) {
+      loadModels();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [settings.engine, settings.language]);
+
   const loadEngines = async () => {
     try {
       console.log('Loading engines...');
@@ -125,6 +135,44 @@ function App() {
     }
   };
 
+  const loadModels = async () => {
+    try {
+      console.log('Loading models for engine:', settings.engine, 'language:', settings.language);
+      
+      // Only load models for engines that support model selection (like Coqui TTS)
+      const enginesWithModels = ['coqui'];
+      if (!enginesWithModels.includes(settings.engine)) {
+        setAvailableModels([]);
+        setSettings(prev => ({ ...prev, model: '', speaker: '' }));
+        return;
+      }
+
+      const response = await enginesAPI.getModels(settings.engine, settings.language);
+      console.log('Models response:', response);
+      
+      if (response.success && response.data.models) {
+        setAvailableModels(response.data.models);
+        
+        // Auto-select first model if none selected
+        if (response.data.models.length > 0 && !settings.model) {
+          const firstModel = response.data.models[0];
+          setSettings(prev => ({ 
+            ...prev, 
+            model: firstModel.id,
+            speaker: firstModel.speakers && firstModel.speakers.length > 0 ? firstModel.speakers[0] : ''
+          }));
+        }
+      } else {
+        setAvailableModels([]);
+        setSettings(prev => ({ ...prev, model: '', speaker: '' }));
+      }
+    } catch (error) {
+      console.error('Failed to load models:', error);
+      setAvailableModels([]);
+      setSettings(prev => ({ ...prev, model: '', speaker: '' }));
+    }
+  };
+
   const handleTextChange = (event) => {
     setText(event.target.value);
     setError(null);
@@ -139,11 +187,21 @@ function App() {
         setSettings(prev => ({ 
           ...prev, 
           [setting]: value,
-          language: firstLanguage
+          language: firstLanguage,
+          model: '', // Reset model when engine changes
+          speaker: '' // Reset speaker when engine changes
         }));
       } else {
-        setSettings(prev => ({ ...prev, [setting]: value }));
+        setSettings(prev => ({ ...prev, [setting]: value, model: '', speaker: '' }));
       }
+    } else if (setting === 'language') {
+      // Reset model and speaker when language changes
+      setSettings(prev => ({ ...prev, [setting]: value, model: '', speaker: '' }));
+    } else if (setting === 'model') {
+      // When model changes, update speaker to first available for that model
+      const selectedModel = availableModels.find(model => model.id === value);
+      const firstSpeaker = selectedModel?.speakers?.[0] || '';
+      setSettings(prev => ({ ...prev, [setting]: value, speaker: firstSpeaker }));
     } else {
       setSettings(prev => ({ ...prev, [setting]: value }));
     }
@@ -210,7 +268,18 @@ function App() {
       if (response.success) {
         const fullAudioUrl = `${process.env.REACT_APP_API_URL || 'http://localhost:5001'}${response.data.url}`;
         setAudioUrl(fullAudioUrl);
-        setSuccess(t('status.completed'));
+        
+        // Check if fallback was used and show notification
+        if (response.data.fallback && response.data.fallback.used) {
+          const fallbackMessage = `${t('status.completed')} - ${t('info.fallbackUsed', {
+            originalEngine: response.data.fallback.originalEngine,
+            actualEngine: response.data.fallback.actualEngine,
+            reason: response.data.fallback.reason
+          })}`;
+          setSuccess(fallbackMessage);
+        } else {
+          setSuccess(t('status.completed'));
+        }
         
         // Auto-play if it's a short text
         if (text.length < 500) {
@@ -593,6 +662,60 @@ function App() {
                     )}
                   </Select>
                 </FormControl>
+
+                {/* Model Selection (only for engines that support it) */}
+                {availableModels.length > 0 && (
+                  <FormControl fullWidth sx={{ mb: 3 }}>
+                    <InputLabel>Model</InputLabel>
+                    <Select
+                      value={settings.model}
+                      onChange={(e) => handleSettingChange('model', e.target.value)}
+                      label="Model"
+                    >
+                      {availableModels.map((model) => (
+                        <MenuItem key={model.id} value={model.id}>
+                          <Tooltip title={model.description || ''} placement="right">
+                            <Box>
+                              {model.name}
+                              {model.quality && (
+                                <Chip 
+                                  label={model.quality} 
+                                  size="small" 
+                                  color={model.quality === 'high' ? 'success' : 'default'}
+                                  sx={{ ml: 1 }}
+                                />
+                              )}
+                            </Box>
+                          </Tooltip>
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                )}
+
+                {/* Speaker Selection (only for multi-speaker models) */}
+                {settings.model && (() => {
+                  const selectedModel = availableModels.find(model => model.id === settings.model);
+                  return selectedModel?.speakers && selectedModel.speakers.length > 1;
+                })() && (
+                  <FormControl fullWidth sx={{ mb: 3 }}>
+                    <InputLabel>Speaker</InputLabel>
+                    <Select
+                      value={settings.speaker}
+                      onChange={(e) => handleSettingChange('speaker', e.target.value)}
+                      label="Speaker"
+                    >
+                      {(() => {
+                        const selectedModel = availableModels.find(model => model.id === settings.model);
+                        return selectedModel?.speakers?.map((speaker) => (
+                          <MenuItem key={speaker} value={speaker}>
+                            {speaker.charAt(0).toUpperCase() + speaker.slice(1)}
+                          </MenuItem>
+                        )) || [];
+                      })()}
+                    </Select>
+                  </FormControl>
+                )}
 
                 {/* Audio Format */}
                 <FormControl fullWidth sx={{ mb: 3 }}>

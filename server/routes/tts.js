@@ -23,7 +23,9 @@ router.post('/synthesize', synthesisLimiter, async (req, res) => {
       speed = 150,
       pitch = 50,
       volume = 100,
-      format = 'mp3'
+      format = 'mp3',
+      model = null,
+      speaker = null
     } = req.body;
 
     // Validation
@@ -65,7 +67,7 @@ router.post('/synthesize', synthesisLimiter, async (req, res) => {
       });
     }
 
-    console.log(`🎵 Synthesizing speech: ${text.substring(0, 50)}... (${engine}, ${language})`);
+    console.log(`🎵 Synthesizing speech: ${text.substring(0, 50)}... (${engine}, ${language}${model ? `, model: ${model}` : ''}${speaker ? `, speaker: ${speaker}` : ''})`);
 
     const result = await ttsService.synthesizeSpeech(text, {
       engine,
@@ -73,7 +75,9 @@ router.post('/synthesize', synthesisLimiter, async (req, res) => {
       speed,
       pitch,
       volume,
-      format
+      format,
+      model,
+      speaker
     });
 
     res.json({

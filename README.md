@@ -4,24 +4,29 @@ A modern, web-based text-to-speech application with multiple TTS engines, multi-
 
 ## Features
 
-- 🎯 **Multiple TTS Engines**: Support for various local TTS engines
-- 🌍 **Multi-language Support**: Including Vietnamese and many other languages
+- 🎯 **Multiple TTS Engines**: 5 engines with intelligent fallback system
+- 🧠 **Neural Voices**: Coqui TTS and gTTS for high-quality speech
+- 🔄 **Dynamic Fallback**: Automatic error detection and engine switching
+- 🌍 **Multi-language Support**: Including Vietnamese and 50+ other languages
 - 🎵 **Audio Preview**: Listen to generated speech directly in the browser
-- 📥 **MP3 Download**: Download high-quality MP3 files
+- 📥 **MP3 Download**: Download high-quality audio in multiple formats
 - ♾️ **Unlimited Length**: No restrictions on text length
-- 🎨 **Modern UI**: Eye-catching and user-friendly interface
+- 🎨 **Modern UI**: Eye-catching and user-friendly interface with Material-UI
 - 🌐 **Multi-language Interface**: Support for multiple UI languages
-- 💰 **No API Fees**: All TTS engines run locally
+- 💰 **No API Fees**: All TTS engines run locally (gTTS uses free tier)
 
 ## Technology Stack
 
 ### Backend
 - Node.js with Express
-- Multiple TTS engines:
-  - espeak-ng (lightweight, multi-language)
-  - Festival (high-quality synthesis)
-  - Pico TTS (compact, efficient)
-  - eSpeak (classic, reliable)
+- Multiple TTS engines with dynamic fallback:
+  - **Coqui TTS** (neural, high-quality, primary engine)
+  - **Google TTS (gTTS)** (neural voices, fallback engine)
+  - **eSpeak-NG** (lightweight, multi-language)
+  - **eSpeak** (classic, reliable)
+  - **pyttsx3** (system voices)
+- Dynamic error detection and intelligent fallback
+- Audio format conversion (MP3, WAV, OGG, M4A)
 
 ### Frontend
 - React 18
